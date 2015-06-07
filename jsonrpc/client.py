@@ -71,8 +71,7 @@ class ServerProxy:
     version = '2.0'
     response_cls = Response
 
-    def __init__(self, uri, transport):
-        self.uri = uri
+    def __init__(self, transport):
         self.transport = transport
 
     def send_request(self, call):
