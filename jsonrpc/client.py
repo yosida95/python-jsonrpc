@@ -56,7 +56,7 @@ class Error(Exception):
         self.data = data
 
     def __repr__(self):
-        return '<Error[{code!d}] at 0x{id!x}>'.format(code=self.code,
+        return '<Error[{code:d}] at 0x{id:x}>'.format(code=self.code,
                                                       id=id(self))
 
 
