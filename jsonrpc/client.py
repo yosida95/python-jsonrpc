@@ -87,3 +87,7 @@ class ServerProxy:
 
     def __getattr__(self, name):
         return Call(name, self.version, self.send_request)
+
+    def close(self):
+        if self.transport:
+            self.transport.close()
