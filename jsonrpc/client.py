@@ -48,9 +48,28 @@ class Call:
         return self.caller(self.dump(params))
 
 
+class Response:
+
+    def __init__(self, call, response):
+        self.call = call
+        self.response = response
+
+    def get_result(self):
+        if self.has_error():
+            return None
+        return self.response.get('result')
+
+    def get_error(self):
+        return self.response.get('error')
+
+    def has_error(self):
+        return self.get_error() is not None
+
+
 class ServerProxy:
 
     version = '2.0'
+    response_cls = Response
 
     def __init__(self, uri, transport):
         self.uri = uri
@@ -64,10 +83,7 @@ class ServerProxy:
         if not isinstance(respobj, dict):
             raise ValueError()
 
-        if respobj['id'] != call.get('id'):
-            raise ValueError()
-
-        return respobj
+        return self.response_cls(call, respobj)
 
     def __getattr__(self, name):
         return Call(name, self.version, self.send_request)
