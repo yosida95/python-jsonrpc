@@ -48,7 +48,7 @@ class Call:
         return self.caller(self.dump(params))
 
 
-class Error:
+class Error(Exception):
 
     def __init__(self, code, message=None, data=None):
         self.code = code
