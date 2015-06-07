@@ -13,7 +13,7 @@ class BaseSocketTransport:
         self._buffer = None
 
     def __enter__(self):
-        return
+        return self
 
     def __exit__(self, exc_info, exc_value, traceback):
         self.close()
