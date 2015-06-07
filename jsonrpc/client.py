@@ -3,7 +3,7 @@
 import json
 import uuid
 
-__all__ = ['ServerProxy', 'Call']
+__all__ = ['ServerProxy', 'Call', 'Error']
 
 
 class Call:
@@ -48,28 +48,23 @@ class Call:
         return self.caller(self.dump(params))
 
 
-class Response:
+class Error:
 
-    def __init__(self, call, response):
-        self.call = call
-        self.response = response
+    def __init__(self, code, message=None, data=None):
+        self.code = code
+        self.message = message
+        self.data = data
 
-    def get_result(self):
-        if self.has_error():
-            return None
-        return self.response.get('result')
+    def __repr__(self):
+        return '<Error[{code!d}] at 0x{id!x}>'.format(code=self.code,
+                                                      id=id(self))
 
-    def get_error(self):
-        return self.response.get('error')
-
-    def has_error(self):
-        return self.get_error() is not None
 
 
 class ServerProxy:
 
     version = '2.0'
-    response_cls = Response
+    error_cls = Response
 
     def __init__(self, transport):
         self.transport = transport
@@ -77,12 +72,32 @@ class ServerProxy:
     def send_request(self, call):
         encoded = json.dumps(call)
         resp = self.transport.send_request(encoded)
+        ParseError = self.error_cls(-32700, 'Parse error')
+        InternalError = self.error_cls(-32603, 'Internal error')
 
-        respobj = json.loads(resp)
+        try:
+            respobj = json.loads(resp)
+        except ValueError as why:
+            raise ParseError from why
+
         if not isinstance(respobj, dict):
-            raise ValueError()
+            raise ParseError
 
-        return self.response_cls(call, respobj)
+        try:
+            if respobj['id'] != call['id']:
+                raise InternalError
+
+            error = respobj.get('error')
+            if error:
+                if not isinstance(error, dict):
+                    raise ParseError
+                raise self.error_cls(error['code'],
+                                     error.get('message'),
+                                     error.get('dta'))
+
+            return respobj['result']
+        except KeyError as why:
+            raise ParseError from why
 
     def __getattr__(self, name):
         return Call(name, self.version, self.send_request)
