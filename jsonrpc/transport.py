@@ -12,6 +12,13 @@ class BaseSocketTransport:
 
         self._buffer = None
 
+    def __enter__(self):
+        return
+
+    def __exit__(self, exc_info, exc_value, traceback):
+        self.close()
+        return False
+
     def send_request(self, call):
         self.ensure_open()
         self._socket.sendall(call.encode('ascii') + b'\n')
