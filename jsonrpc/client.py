@@ -83,16 +83,20 @@ class ServerProxy:
             raise ParseError
 
         try:
+            version = respobj.get('jsonrpc')
             if respobj['id'] != call['id']:
                 raise InternalError
 
             error = respobj.get('error')
             if error:
-                if not isinstance(error, dict):
-                    raise ParseError
-                raise self.error_cls(error['code'],
-                                     error.get('message'),
-                                     error.get('dta'))
+                if version == '2.0':
+                    if not isinstance(error, dict):
+                        raise ParseError
+                    raise self.error_cls(error['code'],
+                                         error.get('message'),
+                                         error.get('data'))
+
+                raise self.error_cls(-32000, error)
 
             return respobj['result']
         except KeyError as why:
