@@ -5,12 +5,13 @@ import socket
 
 class BaseSocketTransport:
 
-    def __init__(self, address):
+    def __init__(self, address, response_encoding):
         self.address = address
         self._socket = None
         self._opened = False
 
         self._buffer = None
+        self._response_encoding = response_encoding
 
     def __enter__(self):
         return
@@ -38,13 +39,13 @@ class BaseSocketTransport:
                 break
             buf += b
 
-        return buf.decode('ascii')
+        return buf.decode(self._response_encoding)
 
 
 class UnixDomainSocketTransport(BaseSocketTransport):
 
-    def __init__(self, socket):
-        super().__init__(socket)
+    def __init__(self, socket, response_encoding='ascii'):
+        super().__init__(socket, response_encoding)
 
     def ensure_open(self):
         if self._socket and self._opened:
@@ -57,8 +58,8 @@ class UnixDomainSocketTransport(BaseSocketTransport):
 
 class TCPSocketTransport(BaseSocketTransport):
 
-    def __init__(self, address, port):
-        super().__init__((address, port))
+    def __init__(self, address, port, response_encoding='ascii'):
+        super().__init__((address, port), response_encoding)
 
     def ensure_open(self):
         if self._socket and self._opened:
