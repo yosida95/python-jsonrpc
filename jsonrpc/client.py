@@ -48,7 +48,7 @@ class Call:
         return self.caller(self.dump(params))
 
 
-class Error:
+class Error(Exception):
 
     def __init__(self, code, message=None, data=None):
         self.code = code
@@ -56,15 +56,14 @@ class Error:
         self.data = data
 
     def __repr__(self):
-        return '<Error[{code!d}] at 0x{id!x}>'.format(code=self.code,
+        return '<Error[{code:d}] at 0x{id:x}>'.format(code=self.code,
                                                       id=id(self))
-
 
 
 class ServerProxy:
 
     version = '2.0'
-    error_cls = Response
+    error_cls = Error
 
     def __init__(self, transport):
         self.transport = transport
@@ -84,16 +83,20 @@ class ServerProxy:
             raise ParseError
 
         try:
+            version = respobj.get('jsonrpc')
             if respobj['id'] != call['id']:
                 raise InternalError
 
             error = respobj.get('error')
             if error:
-                if not isinstance(error, dict):
-                    raise ParseError
-                raise self.error_cls(error['code'],
-                                     error.get('message'),
-                                     error.get('dta'))
+                if version == '2.0':
+                    if not isinstance(error, dict):
+                        raise ParseError
+                    raise self.error_cls(error['code'],
+                                         error.get('message'),
+                                         error.get('data'))
+
+                raise self.error_cls(-32000, error)
 
             return respobj['result']
         except KeyError as why:
