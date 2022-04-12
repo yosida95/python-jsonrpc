@@ -106,5 +106,4 @@ class ServerProxy:
         return Call(name, self.version, self.send_request)
 
     def close(self):
-        if self.transport:
-            self.transport.close()
+        self.transport.close()
