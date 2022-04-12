@@ -28,6 +28,7 @@ setup(
     license='BSD-3-Clause',
 
     packages=find_packages(),
+    python_requires='>= 3.5',
     install_requires=requires,
     tests_require=tests_require,
 
@@ -37,8 +38,7 @@ setup(
         "License :: OSI Approved :: BSD License",
         "Operating System :: OS Independent",
         "Programming Language :: Python",
-        "Programming Language :: Python :: 3.3",
-        "Programming Language :: Python :: 3.4",
+        "Programming Language :: Python :: 3",
         "Topic :: Internet :: WWW/HTTP",
         "Topic :: Software Development :: Libraries :: Python Modules",
     ],
