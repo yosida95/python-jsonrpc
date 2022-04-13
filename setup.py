@@ -2,25 +2,26 @@
 
 import os
 
-from setuptools import setup, find_packages
+from setuptools import (
+    find_packages,
+    setup,
+)
 
 here = os.path.dirname(__file__)
-requires = []
-tests_require = []
 
 
 def _read(name):
     try:
         return open(os.path.join(here, name)).read()
-    except:
+    except FileNotFoundError:
         return ""
-readme = _read("README.rst")
+
 
 setup(
     name='jsonrpc',
-    version='0.1.1',
+    version='0.2.0',
     description='A JSON RPC client library.',
-    long_description=readme,
+    long_description=_read("README.rst"),
     url='https://github.com/yosida95/python-jsonrpc',
 
     author='Kohei YOSHIDA',
@@ -29,8 +30,8 @@ setup(
 
     packages=find_packages(),
     python_requires='>= 3.5',
-    install_requires=requires,
-    tests_require=tests_require,
+    install_requires=[],
+    tests_require=[],
 
     classifiers=[
         "Development Status :: 1 - Planning",
